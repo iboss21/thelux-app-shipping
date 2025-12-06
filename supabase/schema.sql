@@ -215,12 +215,24 @@ CREATE OR REPLACE FUNCTION assign_usa_address()
 RETURNS TRIGGER AS $$
 DECLARE
   new_suite_number INTEGER;
+  max_attempts INTEGER := 100;
+  attempt INTEGER := 0;
 BEGIN
-  -- Generate a random suite number between 1000 and 9999
-  SELECT floor(random() * 9000 + 1000)::INTEGER INTO new_suite_number
-  WHERE NOT EXISTS (
-    SELECT 1 FROM usa_addresses WHERE suite_number = new_suite_number
-  );
+  -- Try to find an available suite number
+  LOOP
+    -- Generate a random suite number between 1000 and 9999
+    new_suite_number := floor(random() * 9000 + 1000)::INTEGER;
+    
+    -- Check if it's available
+    IF NOT EXISTS (SELECT 1 FROM usa_addresses WHERE suite_number = new_suite_number) THEN
+      EXIT; -- Found an available number
+    END IF;
+    
+    attempt := attempt + 1;
+    IF attempt >= max_attempts THEN
+      RAISE EXCEPTION 'Unable to assign suite number after % attempts', max_attempts;
+    END IF;
+  END LOOP;
   
   -- Create USA address
   INSERT INTO usa_addresses (user_id, suite_number)

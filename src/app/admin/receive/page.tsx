@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/client'
+import { getErrorMessage } from '@/lib/errors'
 
 export default function ReceivePackagePage() {
   const router = useRouter()
@@ -106,8 +107,7 @@ export default function ReceivePackagePage() {
         router.push('/admin/packages')
       }, 2000)
     } catch (err: unknown) {
-      const error = err as Error
-      setError(error.message || 'An error occurred while receiving the package')
+      setError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }

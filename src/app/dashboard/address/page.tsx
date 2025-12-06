@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { MapPin, Copy, Check } from 'lucide-react'
+import { MapPin, Check } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { CopyAddressButton } from '@/components/address/copy-address-button'
 
 export default async function AddressPage() {
   const supabase = await createClient()
@@ -94,15 +94,7 @@ United States`
           </div>
 
           <div className="flex gap-3">
-            <Button
-              className="flex-1"
-              onClick={() => {
-                navigator.clipboard.writeText(formattedAddress)
-              }}
-            >
-              <Copy className="w-4 h-4 mr-2" />
-              Copy Address
-            </Button>
+            <CopyAddressButton address={formattedAddress} />
           </div>
         </CardContent>
       </Card>
