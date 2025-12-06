@@ -18,6 +18,17 @@ interface PackageData {
   status: string
 }
 
+interface ShippingMethod {
+  value: string
+  label: string
+  rate: number
+  baseFee: number
+}
+
+interface UserData {
+  subscription_tier: string
+}
+
 export default function ConsolidatePage() {
   const router = useRouter()
   const [packages, setPackages] = useState<PackageData[]>([])
@@ -25,6 +36,12 @@ export default function ConsolidatePage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([
+    { value: 'air_express', label: 'Air Express (3-5 days)', rate: 8, baseFee: 15 },
+    { value: 'air_economy', label: 'Air Economy (7-10 days)', rate: 5, baseFee: 10 },
+    { value: 'sea_lcl', label: 'Sea LCL (30-45 days)', rate: 2, baseFee: 25 },
+  ])
   
   const [formData, setFormData] = useState({
     shippingMethod: 'air_economy',
@@ -36,15 +53,16 @@ export default function ConsolidatePage() {
   })
 
   useEffect(() => {
-    loadPackages()
+    loadData()
   }, [])
 
-  async function loadPackages() {
+  async function loadData() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     
     if (user) {
-      const { data } = await supabase
+      // Load packages
+      const { data: packagesData } = await supabase
         .from('packages')
         .select('*')
         .eq('user_id', user.id)
@@ -52,7 +70,32 @@ export default function ConsolidatePage() {
         .is('consolidated_shipment_id', null)
         .order('received_date', { ascending: false })
       
-      setPackages(data || [])
+      setPackages(packagesData || [])
+
+      // Load user subscription tier
+      const { data: userInfo } = await supabase
+        .from('users')
+        .select('subscription_tier')
+        .eq('id', user.id)
+        .single()
+      
+      setUserData(userInfo)
+
+      // Load shipping rates from database
+      const { data: rates } = await supabase
+        .from('shipping_rates')
+        .select('*')
+        .order('method')
+      
+      if (rates && rates.length > 0) {
+        const methods = rates.map(rate => ({
+          value: rate.method,
+          label: `${rate.method.replace('_', ' ').toUpperCase()}`,
+          rate: rate.cost_per_lb,
+          baseFee: rate.base_fee,
+        }))
+        setShippingMethods(methods)
+      }
     }
     setLoading(false)
   }
@@ -119,16 +162,18 @@ export default function ConsolidatePage() {
   const selectedPackageData = packages.filter(pkg => selectedPackages.includes(pkg.id))
   const totalWeight = selectedPackageData.reduce((sum, pkg) => sum + (pkg.weight_lbs || 0), 0)
 
-  const shippingMethods = [
-    { value: 'air_express', label: 'Air Express (3-5 days)', rate: 8, baseFee: 15 },
-    { value: 'air_economy', label: 'Air Economy (7-10 days)', rate: 5, baseFee: 10 },
-    { value: 'sea_lcl', label: 'Sea LCL (30-45 days)', rate: 2, baseFee: 25 },
-  ]
-
   const selectedMethod = shippingMethods.find(m => m.value === formData.shippingMethod)
   const estimatedCost = selectedMethod 
     ? selectedMethod.baseFee + (totalWeight * selectedMethod.rate)
     : 0
+
+  // Calculate consolidation fee based on subscription tier
+  const consolidationFees = {
+    free: 5.00,
+    standard: 3.00,
+    premium: 0.00,
+  }
+  const consolidationFee = consolidationFees[userData?.subscription_tier as keyof typeof consolidationFees] || 5.00
 
   if (loading) {
     return (
@@ -362,7 +407,7 @@ export default function ConsolidatePage() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-gray-600 dark:text-gray-400">Consolidation Fee</span>
                   <span className="text-gray-900 dark:text-white">
-                    $3.00
+                    ${consolidationFee.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
@@ -371,7 +416,7 @@ export default function ConsolidatePage() {
                     <span>Total Estimate</span>
                   </div>
                   <span className="text-xl font-bold text-primary">
-                    ${(estimatedCost + 3).toFixed(2)}
+                    ${(estimatedCost + consolidationFee).toFixed(2)}
                   </span>
                 </div>
               </div>

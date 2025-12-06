@@ -4,7 +4,10 @@ export const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'notifications@theluxshipping.com'
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 
+  (process.env.NEXT_PUBLIC_APP_URL 
+    ? `noreply@${new URL(process.env.NEXT_PUBLIC_APP_URL).hostname}`
+    : 'noreply@localhost')
 
 export type EmailTemplate = 
   | 'package_received'
@@ -221,6 +224,70 @@ export async function sendInvoiceEmail(
   return sendEmail({
     to,
     subject: `New Invoice: $${data.amount.toFixed(2)} - ${data.type}`,
+    html,
+  })
+}
+
+export async function sendPaymentConfirmationEmail(
+  to: string,
+  data: {
+    userName: string
+    invoiceId: string
+    amount: number
+    type: string
+  }
+) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+        .button { background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }
+        .success-box { background: white; padding: 30px; border-radius: 6px; margin: 20px 0; text-align: center; border: 2px solid #10b981; }
+        .amount { font-size: 36px; font-weight: bold; color: #10b981; }
+        .checkmark { font-size: 64px; }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>✅ Payment Successful!</h1>
+        </div>
+        <div class="content">
+          <p>Hi ${data.userName},</p>
+          
+          <div class="success-box">
+            <div class="checkmark">✅</div>
+            <h2>Payment Confirmed</h2>
+            <p><strong>Invoice ID:</strong> ${data.invoiceId}</p>
+            <p><strong>Type:</strong> ${data.type.replace('_', ' ').toUpperCase()}</p>
+            <p><strong>Amount Paid:</strong></p>
+            <p class="amount">$${data.amount.toFixed(2)}</p>
+          </div>
+          
+          <p>Thank you for your payment! Your invoice has been marked as paid.</p>
+          
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing" class="button">View Billing</a>
+          
+          <p>You can view all your invoices and payment history in your billing dashboard.</p>
+        </div>
+        <div class="footer">
+          <p>TheLux Shipping - Your trusted international parcel forwarding service</p>
+          <p>This is an automated email. Please do not reply.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+
+  return sendEmail({
+    to,
+    subject: `Payment Confirmed: $${data.amount.toFixed(2)}`,
     html,
   })
 }

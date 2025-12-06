@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { stripe } from '@/lib/stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { sendInvoiceEmail } from '@/lib/email'
+import { sendPaymentConfirmationEmail } from '@/lib/email'
 
 // Disable body parsing for webhook signature verification
 export const runtime = 'nodejs'
@@ -79,12 +79,11 @@ export async function POST(request: NextRequest) {
 
           if (userData?.email) {
             // Send payment confirmation email
-            await sendInvoiceEmail(userData.email, {
+            await sendPaymentConfirmationEmail(userData.email, {
               userName: userData.name,
               invoiceId: session.metadata.invoice_id,
               amount: (session.amount_total || 0) / 100,
               type: session.metadata.type || 'payment',
-              dueDate: 'Paid',
             })
           }
         }
