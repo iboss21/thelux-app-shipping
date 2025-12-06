@@ -80,7 +80,7 @@ export default async function DashboardPage() {
           Welcome back, {userData?.name}!
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Here's an overview of your shipping activity
+          Here&apos;s an overview of your shipping activity
         </p>
       </div>
 

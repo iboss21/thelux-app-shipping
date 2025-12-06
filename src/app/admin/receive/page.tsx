@@ -105,8 +105,9 @@ export default function ReceivePackagePage() {
       setTimeout(() => {
         router.push('/admin/packages')
       }, 2000)
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while receiving the package')
+    } catch (err: unknown) {
+      const error = err as Error
+      setError(error.message || 'An error occurred while receiving the package')
     } finally {
       setLoading(false)
     }

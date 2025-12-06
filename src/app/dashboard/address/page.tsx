@@ -142,7 +142,7 @@ United States`
                 <Check className="w-4 h-4 text-primary" />
               </div>
               <span>
-                <strong>Email notifications</strong> - We'll email you when packages arrive
+                <strong>Email notifications</strong> - We&apos;ll email you when packages arrive
               </span>
             </li>
             <li className="flex items-start gap-3">

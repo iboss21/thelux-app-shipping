@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       estimated_delivery: deliveryTimes[method] || 'Contact for estimate',
       currency: 'USD',
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Rate calculation error:', error)
     return NextResponse.json(
       { error: 'Failed to calculate shipping rate' },
