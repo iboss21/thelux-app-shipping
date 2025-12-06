@@ -1,4 +1,4 @@
-import { Package, Home, Ship, MapPin, CreditCard, Settings, LogOut } from 'lucide-react'
+import { Package, Home, Ship, MapPin, CreditCard, Settings, LogOut, Boxes } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
@@ -10,6 +10,7 @@ export default function DashboardLayout({
   const navigation = [
     { name: 'Overview', href: '/dashboard', icon: Home },
     { name: 'Packages', href: '/dashboard/packages', icon: Package },
+    { name: 'Consolidate', href: '/dashboard/consolidate', icon: Boxes },
     { name: 'Shipments', href: '/dashboard/shipments', icon: Ship },
     { name: 'My Address', href: '/dashboard/address', icon: MapPin },
     { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
