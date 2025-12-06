@@ -18,15 +18,17 @@ International parcel forwarding service. Users in foreign countries get a USA ad
 ## Features
 
 - ✅ Landing page with 21st.dev style features grid
-- ✅ Database schema for all core tables
-- 🚧 Authentication system (signup/login with USA address assignment)
-- 🚧 User dashboard (packages, shipments, billing)
-- 🚧 Admin portal (package reception, shipment management)
-- 🚧 Shipping rate calculator
-- 🚧 Payment integration (Stripe)
-- 🚧 Email notifications
-- 🚧 Package consolidation
-- 🚧 Tracking integration
+- ✅ Database schema for all core tables with RLS policies
+- ✅ Authentication system (signup/login with USA address assignment)
+- ✅ User dashboard (packages, shipments, billing, consolidation)
+- ✅ Admin portal (package reception, shipment management)
+- ✅ Shipping rate calculator with multiple methods
+- ✅ Payment integration (Stripe checkout, webhooks, subscriptions)
+- ✅ Email notifications (6 professional HTML templates via Resend)
+- ✅ Package consolidation with multi-package selection
+- ✅ Tracking integration (webhooks and API endpoints)
+- ✅ Billing dashboard with invoice management
+- ✅ Real-time notifications system
 
 ## Getting Started
 
@@ -91,12 +93,26 @@ See `supabase/schema.sql` for the complete schema with RLS policies.
 ```
 ├── src/
 │   ├── app/              # Next.js app router pages
+│   │   ├── (auth)/       # Authentication pages (login, signup)
+│   │   ├── admin/        # Admin portal pages
+│   │   ├── dashboard/    # User dashboard pages
+│   │   └── api/          # API routes
+│   │       ├── calculate-rate/    # Shipping calculator
+│   │       ├── consolidate/       # Package consolidation
+│   │       ├── notify/            # Email notifications
+│   │       ├── payment/           # Stripe integration
+│   │       └── tracking/          # Shipment tracking
 │   ├── components/       # React components
-│   │   └── ui/          # shadcn/ui components
+│   │   ├── ui/          # shadcn/ui components
+│   │   └── address/     # Custom components
 │   └── lib/             # Utility functions and configs
-│       └── supabase/    # Supabase client setup
+│       ├── supabase/    # Supabase client setup
+│       ├── stripe.ts    # Stripe configuration
+│       ├── email.ts     # Email service (Resend)
+│       └── utils.ts     # Helper functions
 ├── supabase/            # Database schema and migrations
-└── public/              # Static assets
+├── public/              # Static assets
+└── API_DOCUMENTATION.md # Complete API documentation
 ```
 
 ## Deployment
@@ -105,15 +121,72 @@ See `supabase/schema.sql` for the complete schema with RLS policies.
 
 1. Push your code to GitHub
 2. Import the repository in Vercel
-3. Add environment variables in Vercel dashboard
+3. Add environment variables in Vercel dashboard (see `.env.example`)
 4. Deploy
+
+For detailed deployment instructions, see [SETUP.md](SETUP.md)
 
 ### Supabase
 
 1. Create a new Supabase project
 2. Run the schema.sql in the SQL editor
-3. Configure RLS policies
+3. Configure RLS policies (included in schema)
 4. Set up storage buckets for package photos
+
+### Stripe
+
+1. Create products for subscription tiers
+2. Set up webhook endpoint: `/api/payment/webhook`
+3. Configure webhook events (see API_DOCUMENTATION.md)
+
+### Resend
+
+1. Create account and get API key
+2. Verify sending domain (recommended)
+3. Configure FROM_EMAIL environment variable
+
+## API Documentation
+
+Complete API documentation is available in [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
+
+**Available Endpoints:**
+- `POST /api/calculate-rate` - Calculate shipping costs
+- `POST /api/consolidate` - Create package consolidation
+- `POST /api/payment/checkout` - Create Stripe checkout session
+- `POST /api/payment/webhook` - Stripe webhook handler
+- `POST /api/tracking` - Tracking webhook
+- `GET /api/tracking` - Get tracking info
+- `POST /api/notify` - Trigger email notification
+
+## Testing
+
+### Run Locally
+
+```bash
+npm run dev
+```
+
+### Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+### Lint Code
+
+```bash
+npm run lint
+```
+
+## Security
+
+- ✅ Row-level security (RLS) on all database tables
+- ✅ Protected API routes with authentication
+- ✅ Stripe webhook signature verification
+- ✅ Input validation on all endpoints
+- ✅ Environment variable protection
+- ✅ CodeQL security scan passed (0 vulnerabilities)
 
 ## License
 
