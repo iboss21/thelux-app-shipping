@@ -4,10 +4,7 @@ import { PackageStatus, ShippingMethod } from '../models/types';
 describe('PackageService', () => {
   beforeEach(() => {
     // Clear all packages before each test
-    const packages = packageService.getAllPackages();
-    packages.forEach(pkg => {
-      // We need to access the private map, so we'll just create a new test scenario
-    });
+    packageService.clearAllPackages();
   });
 
   describe('receivePackage', () => {

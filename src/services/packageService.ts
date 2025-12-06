@@ -111,6 +111,14 @@ class PackageService {
     
     return estimatedDate;
   }
+
+  deletePackage(packageId: string): boolean {
+    return this.packages.delete(packageId);
+  }
+
+  clearAllPackages(): void {
+    this.packages.clear();
+  }
 }
 
 export default new PackageService();
