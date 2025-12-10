@@ -47,15 +47,25 @@ npm install
    - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
    - `STRIPE_SECRET_KEY`
 
-3. Set up webhooks:
-   - Go to Developers > Webhooks
-   - Add endpoint: `https://your-domain.com/api/webhooks/stripe`
-   - Select events: `invoice.payment_succeeded`, `invoice.payment_failed`
-   - Get the webhook secret: `STRIPE_WEBHOOK_SECRET`
+3. Create Products and Prices:
+   - Create a "Standard Plan" subscription product
+     - Price: $9.99/month
+     - Copy the Price ID: `STRIPE_STANDARD_PRICE_ID`
+   - Create a "Premium Plan" subscription product
+     - Price: $19.99/month
+     - Copy the Price ID: `STRIPE_PREMIUM_PRICE_ID`
 
-4. Create Products in Stripe:
-   - Create subscription products for Free, Standard, and Premium tiers
-   - Set prices: $0/month, $15/month, $40/month
+4. Set up webhooks:
+   - Go to Developers > Webhooks
+   - Add endpoint: `https://your-domain.com/api/payment/webhook`
+   - Select events: 
+     - `checkout.session.completed`
+     - `payment_intent.succeeded`
+     - `payment_intent.payment_failed`
+     - `customer.subscription.created`
+     - `customer.subscription.updated`
+     - `customer.subscription.deleted`
+   - Get the webhook secret: `STRIPE_WEBHOOK_SECRET`
 
 ### 4. Set Up Resend
 
@@ -83,9 +93,12 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_STANDARD_PRICE_ID=price_...
+STRIPE_PREMIUM_PRICE_ID=price_...
 
 # Email (Resend)
 RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=notifications@theluxshipping.com
 
 # App URL
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -137,8 +150,8 @@ Click "Deploy" and wait for the deployment to complete.
 ### 5. Update Stripe Webhook
 
 Update your Stripe webhook endpoint to point to your Vercel domain:
-- Old: `http://localhost:3000/api/webhooks/stripe`
-- New: `https://your-domain.vercel.app/api/webhooks/stripe`
+- Old: `http://localhost:3000/api/payment/webhook`
+- New: `https://your-domain.vercel.app/api/payment/webhook`
 
 ## Post-Deployment Configuration
 
